@@ -22,41 +22,18 @@ function getMap() {
 
 }
 
-var pushPin = function (lat, long, numberOfNews) {
-
-    var offset = new Microsoft.Maps.Point(0, 5);
-    var pushpinOptions = { text: numberOfNews, visible: true, textOffset: offset };
-    var pushpin = new Microsoft.Maps.Pushpin(new Microsoft.Maps.Location(lat, long), pushpinOptions);
-
-
-    var pushpinClick = Microsoft.Maps.Events.addHandler(pushpin, 'click', populateNewsList);
-
-    map.entities.push(pushpin);
-
+var getRadiusInKM = function () {
+    var width = map.getWidth();
+    var height = map.getHeight();
+    var mpp = map.getMetersPerPixel();
+    return (Math.min(width, height) / 2) * (mpp) / (1000);
 };
-
-
-
-var populateNewsList = function () {
-    addRow();
-};
-
-var addRow = function () {
-    var div = document.createElement('div');
-    div.className = 'row';
-    div.innerHTML = 'List item';
-    document.getElementById('myList').appendChild(div);
-};
-
 var onViewChangeEnd = function (e)
 {
     map.entities.clear();
     var latlon = map.getCenter();
     var zoomLevel = map.getZoom();
-    var width = map.getWidth();
-    var height = map.getHeight();
-    var mpp = map.getMetersPerPixel();
-    var radiusInKM = (Math.min(width,height) / 2) * (mpp) / (1000);
+    var radiusInKM = getRadiusInKM();
     var cities = null;
     var citiesType = null;
 
@@ -78,16 +55,68 @@ var onViewChangeEnd = function (e)
 
     console.log(cities);
     pinCities(cities);
-    var news = newsSearch(radiusInKM, latlon.latitude, latlon.longitude);
 
 };
 
 var pinCities = function (cities) {
     for (var i = 0; i < cities.geonames.length; i++) {
-        pushPin(cities.geonames[i].lat, cities.geonames[i].lng, "5");
+        pushPin(cities.geonames[i].lat, cities.geonames[i].lng, cities.geonames[i].name);
         console.log(cities.geonames[i].lat + " " + cities.geonames[i].lng + " ");
     }
 
+};
+
+var pushPin = function (lat, long, cityName) {
+    
+    var offset = new Microsoft.Maps.Point(0, 5);
+    var pushpinOptions = { text: "N", visible: true, textOffset: offset };
+    var pushpin = new Microsoft.Maps.Pushpin(new Microsoft.Maps.Location(lat, long), pushpinOptions);
+
+    var populateNewsList = function () {
+        var news = newsSearch(lat, long, cityName);
+        newsList(cityName, news);
+        //var numberOfNews = news.d.results.length;
+        
+    };
+
+    var pushpinClick = Microsoft.Maps.Events.addHandler(pushpin, 'click', populateNewsList);
+
+    map.entities.push(pushpin);
+
+};
+
+
+var newsSearch = function (lat, long, cityName) {
+    var xmlHttp = new XMLHttpRequest();
+    var encodedAuth = btoa("DYRL8vfmzDtLbJmo7+j/S+kZ1D/4j0drk6sZyxBD0wg:DYRL8vfmzDtLbJmo7+j/S+kZ1D/4j0drk6sZyxBD0wg");
+    var requestStr = "https:\/\/api.datamarket.azure.com\/Bing\/Search\/News?Query=%27" + cityName + "%27&Latitude=" + lat + "&Longitude=" + long + "&$top=10&$format=JSON";
+    xmlHttp.open("Get", requestStr, false);
+    xmlHttp.setRequestHeader("Authorization", "Basic " + encodedAuth);
+    xmlHttp.send(null);
+    console.log(xmlHttp.responseText);
+    return JSON.parse(xmlHttp.responseText);
+};
+
+var newsList = function (cityName, news) {
+
+    var list = document.getElementById('myList');
+    var cityDiv = document.createElement('div');
+
+    list.innerHTML = "";
+    cityDiv.className = 'row';
+    cityDiv.style.border = 'solid';
+    cityDiv.innerHTML = "<b>"+cityName+"</b>";
+    list.appendChild(cityDiv);
+    for (var i = 0; i < news.d.results.length; i++)
+    {
+        var newsDiv = document.createElement('div');
+        newsDiv.className = 'row';
+        newsDiv.style.border = 'solid';
+        newsDiv.innerHTML = JSON.stringify(news.d.results[i].Title)
+            + "<br><a target=\"_blank\" href="+JSON.stringify(news.d.results[i].Url)
+            +">" + JSON.stringify(news.d.results[i].Url) + "</a>";
+        list.appendChild(newsDiv);
+    }
 };
 
 var getCitiesLowZoom = function(radius, lat, long, citiesType)
@@ -126,17 +155,6 @@ var getCitiesHighZoom = function(radius, lat, long)
     var cities = JSON.parse(xmlHttp.responseText);
 
     return cities;
-};
-
-var newsSearch = function (radius, lat, long) {
-    var xmlHttp = new XMLHttpRequest();
-    var encodedAuth = btoa("DYRL8vfmzDtLbJmo7+j/S+kZ1D/4j0drk6sZyxBD0wg:DYRL8vfmzDtLbJmo7+j/S+kZ1D/4j0drk6sZyxBD0wg");
-    var requestStr = "https:\/\/api.datamarket.azure.com\/Bing\/Search\/News?Query=%27seattle%27&Latitude=" + lat + "&Longitude=" + long + "&$top=100&$format=JSON";
-    xmlHttp.open("Get", requestStr, false);
-    xmlHttp.setRequestHeader("Authorization", "Basic " + encodedAuth);
-    xmlHttp.send(null);
-    console.log(xmlHttp.responseText);
-    return JSON.parse(xmlHttp.responseText);
 };
 
 var cities = function () {
