@@ -1,21 +1,18 @@
 ﻿<!DOCTYPE html>
 <html ng-app="app">
+    <head>
+        <title></title>
+        <script src="http://ecn.dev.virtualearth.net/mapcontrol/mapcontrol.ashx?v=7.0"></script>
+        <script src="scripts/angular.js"></script>
+        <script src="scripts/angular.min.js"></script>
+        <script src="scripts/map.controller.js"></script>
+    </head>
+    <body onload="getMap();">
 
-<head>
-    <title></title>
-    <script src="http://ecn.dev.virtualearth.net/mapcontrol/mapcontrol.ashx?v=7.0"></script>
-    <script src="scripts/angular.js"></script>
-    <script src="scripts/angular.min.js"></script>
-    <script src="scripts/map.controller.js"></script>
-</head>
-
-<body onload="getMap();">
-
-    <div id='myMap' style="position:absolute; width:70%; height:100%;"></div>
-    <div id='myList' style="float:right; width:28%; float:right; height:100%;"></div>
-            <!--<div ng-repeat="city in cities">
-                <div on-click=navigateToUrl({{city.Url}})>{{city.NewsTitle}}</div>
-            </div>-->
-
-</body>
+        <div id='myMap' style="position:absolute; width:70%; height:100%;"></div>
+        <div id='myList' style="float:right; width:28%; float:right; height:100%;"></div>
+                <!--<div ng-repeat="city in cities">
+                    <div on-click=navigateToUrl(city)>{{city.NewsTitle}}</div>
+                </div>-->
+    </body>
 </html>

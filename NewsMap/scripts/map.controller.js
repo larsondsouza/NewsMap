@@ -67,22 +67,16 @@ var pinCities = function (cities) {
 };
 
 var pushPin = function (lat, long, cityName) {
-    
     var offset = new Microsoft.Maps.Point(0, 5);
-    var pushpinOptions = { text: "N", visible: true, textOffset: offset };
+    var news = newsSearch(lat, long, cityName);
+    var newsCount = "" + news.d.results.length + "";
+    var pushpinOptions = { text: newsCount, visible: true, textOffset: offset };
     var pushpin = new Microsoft.Maps.Pushpin(new Microsoft.Maps.Location(lat, long), pushpinOptions);
-
     var populateNewsList = function () {
-        var news = newsSearch(lat, long, cityName);
         newsList(cityName, news);
-        //var numberOfNews = news.d.results.length;
-        
     };
-
     var pushpinClick = Microsoft.Maps.Events.addHandler(pushpin, 'click', populateNewsList);
-
     map.entities.push(pushpin);
-
 };
 
 
@@ -157,10 +151,6 @@ var getCitiesHighZoom = function(radius, lat, long)
     return cities;
 };
 
-var cities = function () {
-    // Get news from clicked city
-};
-
-var navigateToUrl = function(newsTitle) {
+var navigateToUrl = function(city) {
     // open tab with URL
 };
