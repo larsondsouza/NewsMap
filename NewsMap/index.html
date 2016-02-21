@@ -54,7 +54,17 @@
           var height = map.getHeight();
           var mpp = map.getMetersPerPixel();
           var radiusInKM = (Math.min(width,height) / 2) * (mpp) / (1000);
-          var cities = getCities(radiusInKM, latlon.latitude, latlon.longitude);
+          var cities = null;
+          // states views
+          if(zoomLevel <= 7) {
+              cities = getCitiesHighZoom(radiusInKM, latlon.latitude, latlon.longitude);
+          }
+          else {
+              // cities view
+              cities = getCitiesLowZoom(radiusInKM, latlon.latitude, latlon.longitude);
+          }
+
+          console.log(cities);
           pinCities(cities);
           var news = newsSearch(radiusInKM, latlon.latitude, latlon.longitude);
 
@@ -70,14 +80,41 @@
 
       };
 
-      var getCities = function(radius, lat, long)
+      var getCitiesLowZoom = function(radius, lat, long)
       {
-          var query = "http:\/\/api.geonames.org\/findNearbyPlaceNameJSON?lat=" + lat + "&lng=" + long + "&radius=" + Math.min(radius,300) + "&cities=cities15000&username=jrdeveloper";
+          var query = "http:\/\/api.geonames.org\/findNearbyPlaceNameJSON?lat=" + lat + "&lng=" + long + "&radius=" + Math.min(radius,300) + "&cities=cities15000&username=devKing";
           var xmlHttp = new XMLHttpRequest();
           xmlHttp.open( "GET", query, false ); // false for synchronous request
           xmlHttp.send(null);
           console.log(xmlHttp.responseText);
           var cities = JSON.parse(xmlHttp.responseText);
+          return cities;
+      };
+
+      var getCitiesHighZoom = function(radius, lat, long)
+      {
+          var xmlHttp = new XMLHttpRequest();
+
+          // prepare query
+          // http://api.geonames.org/citiesJSON?north=46.5657&south=44.26&east=-91.050&west=-95.15&lang=de&username=devKing
+          var outReach = 5.0; // 5 lat, lng pts (1 to 2 states out)
+          var maxRows = 20; // max cities returned
+          // set bounding box to find cities within it
+          var north = lat + outReach;
+          var south = lat - outReach;
+          var east = long + outReach;
+          var west = long - outReach;
+
+          query = "http:\/\/api.geonames.org\/citiesJSON?north=" + north + "&south=" + south + "&east=" + east + "&west=" + west + "&maxRows=" + maxRows + "&username=devKing";
+          // execute request
+          xmlHttp.open( "GET", query, false ); // false for synchronous request
+          xmlHttp.send(null);
+          console.log(xmlHttp.responseText);
+
+          console.log("Current lat, lng: " + lat + ", " + long + "W: " + west + "E: " + east + "N: " + north + "S: " + south);
+          console.log("getting state cities");
+          var cities = JSON.parse(xmlHttp.responseText);
+
           return cities;
       };
 
