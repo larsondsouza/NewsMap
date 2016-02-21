@@ -60,7 +60,7 @@ var onViewChangeEnd = function (e)
 
 var pinCities = function (cities) {
     for (var i = 0; i < cities.geonames.length; i++) {
-        pushPin(cities.geonames[i].lat, cities.geonames[i].lng, cities.geonames[i].name);
+        asyncPushPin(cities.geonames[i].lat, cities.geonames[i].lng, cities.geonames[i].name);
         console.log(cities.geonames[i].lat + " " + cities.geonames[i].lng + " ");
     }
 
@@ -95,20 +95,25 @@ var newsList = function (cityName, news) {
 
     var list = document.getElementById('myList');
     var cityDiv = document.createElement('div');
-
+    var newsTitle = "";
+    var newsUrl = "";
+    var newsDesc = "";
     list.innerHTML = "";
     cityDiv.className = 'row';
-    cityDiv.style.border = 'solid';
-    cityDiv.innerHTML = "<b>"+cityName+"</b>";
+    cityDiv.stylepadding = '10px 10px 10px 10px';
+    cityDiv.innerHTML = "<h1>News for: "+cityName+"</h1>";
     list.appendChild(cityDiv);
     for (var i = 0; i < news.d.results.length; i++)
     {
+        newsTitle = JSON.stringify(news.d.results[i].Title);
+        newsUrl = JSON.stringify(news.d.results[i].Url);
+        newsDesc = JSON.stringify(news.d.results[i].Description);
         var newsDiv = document.createElement('div');
         newsDiv.className = 'row';
-        newsDiv.style.border = 'solid';
-        newsDiv.innerHTML = JSON.stringify(news.d.results[i].Title)
-            + "<br><a target=\"_blank\" href="+JSON.stringify(news.d.results[i].Url)
-            +">" + JSON.stringify(news.d.results[i].Url) + "</a>";
+        newsDiv.style.padding = '10px 10px 10px 10px';
+        //newsDiv.style.backgroundColor = '#ffa500';
+        newsDiv.innerHTML = "<a target=\"_blank\" href=" + newsUrl
+            + ">" + newsTitle.substring(1,newsTitle.length-1) + "</a><br>"+"<span><font size=\"2\">"+newsDesc+"</font></span>";
         list.appendChild(newsDiv);
     }
 };
@@ -153,4 +158,44 @@ var getCitiesHighZoom = function(radius, lat, long)
 
 var navigateToUrl = function(city) {
     // open tab with URL
+};
+
+var asyncPushPin = function (lat, long, cityName) {
+    var offset = new Microsoft.Maps.Point(0, 5);
+    var pushpinOptions = { text: " ", visible: true, textOffset: offset };
+    var pushpin = new Microsoft.Maps.Pushpin(new Microsoft.Maps.Location(lat, long), pushpinOptions);
+    asyncNewsSearch(lat, long, cityName, pushpin);
+    map.entities.push(pushpin);
+
+};
+
+var asyncNewsSearch = function (lat, long, cityName, pushpin) {
+    var xmlhttp = new XMLHttpRequest();
+    var encodedAuth = btoa("DYRL8vfmzDtLbJmo7+j/S+kZ1D/4j0drk6sZyxBD0wg:DYRL8vfmzDtLbJmo7+j/S+kZ1D/4j0drk6sZyxBD0wg");
+    var requestStr = "https:\/\/api.datamarket.azure.com\/Bing\/Search\/News?Query=%27" + cityName + "%27&Latitude=" + lat + "&Longitude=" + long + "&$top=10&$format=JSON";
+    xmlhttp.open("Get", requestStr, true);
+    xmlhttp.setRequestHeader("Authorization", "Basic " + encodedAuth);
+    xmlhttp.onreadystatechange = function () {
+        if (xmlhttp.readyState !== XMLHttpRequest.DONE) {
+            return;
+        }
+        if (xmlhttp.status !== 200) {
+            return;
+        }
+
+        var news = JSON.parse(xmlhttp.responseText);
+        var newsCount = "" + news.d.results.length + "";
+
+        var populateNewsList = function () {
+            newsList(cityName, news);
+        };
+
+        var pushpinClick = Microsoft.Maps.Events.addHandler(pushpin, 'click', populateNewsList);
+
+        var offset = new Microsoft.Maps.Point(0, 5);
+        var pushpinOptions = { text: newsCount, visible: true, textOffset: offset };
+        pushpin.setOptions(pushpinOptions);
+
+    };
+    xmlhttp.send();
 };

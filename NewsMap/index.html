@@ -1,18 +1,14 @@
 ﻿<!DOCTYPE html>
-<html ng-app="app">
+<html>
     <head>
         <title></title>
         <script src="http://ecn.dev.virtualearth.net/mapcontrol/mapcontrol.ashx?v=7.0"></script>
-        <script src="scripts/angular.js"></script>
-        <script src="scripts/angular.min.js"></script>
         <script src="scripts/map.controller.js"></script>
     </head>
-    <body onload="getMap();">
-
+    <body onload="getMap();" style="font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">     
         <div id='myMap' style="position:absolute; width:70%; height:100%;"></div>
-        <div id='myList' style="float:right; width:28%; float:right; height:100%;"></div>
-                <!--<div ng-repeat="city in cities">
-                    <div on-click=navigateToUrl(city)>{{city.NewsTitle}}</div>
-                </div>-->
+        <div id='outList' style="float:right; width:28%; float:right; height:100%;">
+            <div id='myList' style="overflow:scroll; height:900px"></div>
+        </div>
     </body>
 </html>
