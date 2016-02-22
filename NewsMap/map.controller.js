@@ -28,6 +28,7 @@ var getRadiusInKM = function () {
     var mpp = map.getMetersPerPixel();
     return (Math.min(width, height) / 2) * (mpp) / (1000);
 };
+
 var onViewChangeEnd = function (e)
 {
     map.entities.clear();
@@ -37,7 +38,6 @@ var onViewChangeEnd = function (e)
     var cities = null;
     var citiesType = null;
 
-    console.log("ZOOM: " + + zoomLevel + "HERE");
     // states views
     // zoom 1 - 5 (very zoomed out)
     if(zoomLevel <= 5) {
@@ -53,45 +53,21 @@ var onViewChangeEnd = function (e)
         cities = getCitiesLowZoom(radiusInKM, latlon.latitude, latlon.longitude, citiesType);
     }
 
-    console.log(cities);
     pinCities(cities);
 
 };
 
-var pinCities = function (cities) {
-    for (var i = 0; i < cities.geonames.length; i++) {
+var pinCities = function (cities)
+{
+    for (var i = 0; i < cities.geonames.length; i++) 
+    {
         asyncPushPin(cities.geonames[i].lat, cities.geonames[i].lng, cities.geonames[i].name);
-        console.log(cities.geonames[i].lat + " " + cities.geonames[i].lng + " ");
     }
 
 };
 
-var pushPin = function (lat, long, cityName) {
-    var offset = new Microsoft.Maps.Point(0, 5);
-    var news = newsSearch(lat, long, cityName);
-    var newsCount = "" + news.d.results.length + "";
-    var pushpinOptions = { text: newsCount, visible: true, textOffset: offset };
-    var pushpin = new Microsoft.Maps.Pushpin(new Microsoft.Maps.Location(lat, long), pushpinOptions);
-    var populateNewsList = function () {
-        newsList(cityName, news);
-    };
-    var pushpinClick = Microsoft.Maps.Events.addHandler(pushpin, 'click', populateNewsList);
-    map.entities.push(pushpin);
-};
-
-
-var newsSearch = function (lat, long, cityName) {
-    var xmlHttp = new XMLHttpRequest();
-    var encodedAuth = btoa("DYRL8vfmzDtLbJmo7+j/S+kZ1D/4j0drk6sZyxBD0wg:DYRL8vfmzDtLbJmo7+j/S+kZ1D/4j0drk6sZyxBD0wg");
-    var requestStr = "https:\/\/api.datamarket.azure.com\/Bing\/Search\/News?Query=%27" + cityName + "%27&Latitude=" + lat + "&Longitude=" + long + "&$top=10&$format=JSON";
-    xmlHttp.open("Get", requestStr, false);
-    xmlHttp.setRequestHeader("Authorization", "Basic " + encodedAuth);
-    xmlHttp.send(null);
-    console.log(xmlHttp.responseText);
-    return JSON.parse(xmlHttp.responseText);
-};
-
-var newsList = function (cityName, news) {
+var newsList = function (cityName, news)
+{
 
     var list = document.getElementById('myList');
     var cityDiv = document.createElement('div');
@@ -100,21 +76,31 @@ var newsList = function (cityName, news) {
     var newsDesc = "";
     list.innerHTML = "";
     cityDiv.className = 'row';
-    cityDiv.stylepadding = '10px 10px 10px 10px';
-    cityDiv.innerHTML = "<h1>News for: "+cityName+"</h1>";
+    cityDiv.style.padding = '5px 5px 1px 5px';
+    cityDiv.style.background = "#f2f2f2";
+    cityDiv.innerHTML = "<h2>News for: "+cityName+"</h1>";
     list.appendChild(cityDiv);
+
     for (var i = 0; i < news.d.results.length; i++)
     {
         newsTitle = JSON.stringify(news.d.results[i].Title);
         newsUrl = JSON.stringify(news.d.results[i].Url);
         newsDesc = JSON.stringify(news.d.results[i].Description);
+
+        var gapDiv = document.createElement('div');
+        gapDiv.className = 'row';
+        gapDiv.style.padding = '5px 5px 5px 5px';
+        gapDiv.style.background = '#ffffff';
+        list.appendChild(gapDiv);
+
         var newsDiv = document.createElement('div');
         newsDiv.className = 'row';
-        newsDiv.style.padding = '10px 10px 10px 10px';
-        //newsDiv.style.backgroundColor = '#ffa500';
+        newsDiv.style.padding = '5px 5px 5px 5px';
+        newsDiv.style.background = '#f2f2f2';
         newsDiv.innerHTML = "<a target=\"_blank\" href=" + newsUrl
             + ">" + newsTitle.substring(1,newsTitle.length-1) + "</a><br>"+"<span><font size=\"2\">"+newsDesc+"</font></span>";
         list.appendChild(newsDiv);
+
     }
 };
 
@@ -124,7 +110,6 @@ var getCitiesLowZoom = function(radius, lat, long, citiesType)
     var xmlHttp = new XMLHttpRequest();
     xmlHttp.open( "GET", query, false ); // false for synchronous request
     xmlHttp.send(null);
-    console.log(xmlHttp.responseText);
     var cities = JSON.parse(xmlHttp.responseText);
     return cities;
 };
@@ -147,20 +132,13 @@ var getCitiesHighZoom = function(radius, lat, long)
     // execute request
     xmlHttp.open( "GET", query, false ); // false for synchronous request
     xmlHttp.send(null);
-    console.log(xmlHttp.responseText);
 
-    console.log("Current lat, lng: " + lat + ", " + long + "W: " + west + "E: " + east + "N: " + north + "S: " + south);
-    console.log("getting state cities");
     var cities = JSON.parse(xmlHttp.responseText);
-
     return cities;
 };
 
-var navigateToUrl = function(city) {
-    // open tab with URL
-};
-
-var asyncPushPin = function (lat, long, cityName) {
+var asyncPushPin = function (lat, long, cityName)
+{
     var offset = new Microsoft.Maps.Point(0, 5);
     var pushpinOptions = { text: " ", visible: true, textOffset: offset };
     var pushpin = new Microsoft.Maps.Pushpin(new Microsoft.Maps.Location(lat, long), pushpinOptions);
@@ -169,9 +147,10 @@ var asyncPushPin = function (lat, long, cityName) {
 
 };
 
-var asyncNewsSearch = function (lat, long, cityName, pushpin) {
+var asyncNewsSearch = function (lat, long, cityName, pushpin)
+{
     var xmlhttp = new XMLHttpRequest();
-    var encodedAuth = btoa("DYRL8vfmzDtLbJmo7+j/S+kZ1D/4j0drk6sZyxBD0wg:DYRL8vfmzDtLbJmo7+j/S+kZ1D/4j0drk6sZyxBD0wg");
+    var encodedAuth = btoa("cibG103JaTzptFTFGeCf3T9Di6PRqDaL6kjy5gSUucc:cibG103JaTzptFTFGeCf3T9Di6PRqDaL6kjy5gSUucc");
     var requestStr = "https:\/\/api.datamarket.azure.com\/Bing\/Search\/News?Query=%27" + cityName + "%27&Latitude=" + lat + "&Longitude=" + long + "&$top=10&$format=JSON";
     xmlhttp.open("Get", requestStr, true);
     xmlhttp.setRequestHeader("Authorization", "Basic " + encodedAuth);
@@ -191,11 +170,9 @@ var asyncNewsSearch = function (lat, long, cityName, pushpin) {
         };
 
         var pushpinClick = Microsoft.Maps.Events.addHandler(pushpin, 'click', populateNewsList);
-
         var offset = new Microsoft.Maps.Point(0, 5);
         var pushpinOptions = { text: newsCount, visible: true, textOffset: offset };
         pushpin.setOptions(pushpinOptions);
-
     };
     xmlhttp.send();
 };

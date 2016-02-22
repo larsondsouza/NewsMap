@@ -1,14 +1,19 @@
 ﻿<!DOCTYPE html>
 <html>
     <head>
-        <title></title>
+        <title>NEWS MAP</title>
         <script src="http://ecn.dev.virtualearth.net/mapcontrol/mapcontrol.ashx?v=7.0"></script>
-        <script src="scripts/map.controller.js"></script>
+        <script src="/map.controller.js"></script>
     </head>
     <body onload="getMap();" style="font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">     
-        <div id='myMap' style="position:absolute; width:70%; height:100%;"></div>
+        <div id="banner" style="position: fixed;background:#d9d9d9; height:8%; width: 100%;z-index:-1">
+            <div id="banner-content">
+                <h1>NEWS MAP</h1>.
+            </div>
+        </div>
+        <div id='myMap' style="position:fixed; top:100px; width:71%; height:92%;"></div>
         <div id='outList' style="float:right; width:28%; float:right; height:100%;">
-            <div id='myList' style="overflow:scroll; height:900px"></div>
+            <div id='myList'> <div style="vertical-align:middle"><br><br><br><br><h3>Click on any of the pins on the map to read top news articles for that city.</h3></div></div>
         </div>
     </body>
 </html>
